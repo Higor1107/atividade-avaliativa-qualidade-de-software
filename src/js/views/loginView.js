@@ -129,6 +129,11 @@ export function renderLoginView(container, onLoginSuccess) {
             showError('error-name', 'Informe o nome completo');
             hasError = true;
           }
+          const phone = document.getElementById('input-phone')?.value.trim() || '';
+          if (phone && !isValidPhone(phone)) {
+            showError('error-phone', 'Telefone inválido (mín. 10 dígitos com DDD)');
+            hasError = true;
+          }
         }
 
         if (hasError) {

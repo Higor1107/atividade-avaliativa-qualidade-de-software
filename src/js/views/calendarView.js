@@ -1,7 +1,7 @@
 /**
  * calendarView.js — Calendário interativo + gestão de horários
  */
-import { generateCalendarDays, getMonthName, formatTime, getTodayStr } from '../utils/dateUtils.js';
+import { generateCalendarDays, getMonthName, formatTime, getTodayStr, formatDate } from '../utils/dateUtils.js';
 import { isValidTimeRange } from '../utils/validators.js';
 import { getMyEstablishment } from '../services/establishmentService.js';
 import { getSlotsByEstablishment, createTimeSlot, deleteTimeSlot } from '../services/timeSlotService.js';
@@ -72,7 +72,7 @@ export async function renderCalendarView(container, profile, showToast) {
         </div>
 
         <div class="glass-card slots-panel">
-          <h3>Horários — ${selectedDate.split('-').reverse().join('/')}</h3>
+          <h3>Horários — ${formatDate(selectedDate)}</h3>
 
           <div style="display:flex;gap:var(--space-sm);margin:var(--space-md) 0;">
             <input class="form-input" type="time" id="input-start-time" style="flex:1;" />

@@ -12,7 +12,7 @@ export async function createAppointment(data) {
     notes: sanitizeInput(data.notes || ''),
   };
 
-  // Tenta usar a RPC atômica primeiro
+  // Execução atômica obrigatória
   const { data: result, error: rpcError } = await supabase
     .rpc('book_appointment', {
       p_visitor_id: sanitizedData.visitor_id,
@@ -23,25 +23,6 @@ export async function createAppointment(data) {
     });
 
   if (rpcError) {
-    // Fallback: se a RPC não existir, usa insert direto
-    if (rpcError.message?.includes('function') || rpcError.code === '42883') {
-      const { data: insertResult, error: insertError } = await supabase
-        .from('appointments')
-        .insert([sanitizedData])
-        .select()
-        .single();
-      if (insertError) throw insertError;
-
-      // Marca o slot como indisponível
-      if (sanitizedData.time_slot_id) {
-        await supabase
-          .from('time_slots')
-          .update({ is_available: false })
-          .eq('id', sanitizedData.time_slot_id);
-      }
-
-      return insertResult;
-    }
     throw rpcError;
   }
 
