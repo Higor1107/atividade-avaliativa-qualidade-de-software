@@ -86,7 +86,7 @@ export async function renderEstablishmentSetupView(container, profile, showToast
     };
 
     // Validate
-    if (!isValidName(data.name) && data.name.length < 2) {
+    if (!isValidName(data.name) || data.name.length < 2) {
       document.getElementById('error-est-name').textContent = 'Nome é obrigatório';
       btn.disabled = false;
       btn.textContent = isEdit ? 'Salvar Alterações' : 'Cadastrar';

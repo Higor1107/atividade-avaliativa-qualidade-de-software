@@ -96,11 +96,7 @@ CREATE POLICY "Dono do estab. pode deletar slots" ON public.time_slots
     )
   );
 
--- Permitir update de is_available por qualquer autenticado (para agendar)
-CREATE POLICY "Autenticados podem marcar slot como ocupado" ON public.time_slots
-  FOR UPDATE TO authenticated
-  USING (true)
-  WITH CHECK (true);
+-- Nota: updates de is_available são feitos via RPC book_appointment (seguro)
 
 -- 4. Tabela de agendamentos
 CREATE TABLE IF NOT EXISTS public.appointments (
@@ -129,11 +125,17 @@ CREATE POLICY "Visitante pode criar agendamento" ON public.appointments
   FOR INSERT TO authenticated
   WITH CHECK (auth.uid() = visitor_id);
 
-CREATE POLICY "Envolvidos podem atualizar agendamento" ON public.appointments
+-- Visitante só pode cancelar seus próprios agendamentos
+CREATE POLICY "Visitante pode cancelar seu agendamento" ON public.appointments
+  FOR UPDATE TO authenticated
+  USING (auth.uid() = visitor_id)
+  WITH CHECK (auth.uid() = visitor_id);
+
+-- Dono do estabelecimento pode confirmar/completar agendamentos
+CREATE POLICY "Dono estab. pode gerenciar agendamentos" ON public.appointments
   FOR UPDATE TO authenticated
   USING (
-    auth.uid() = visitor_id
-    OR EXISTS (
+    EXISTS (
       SELECT 1 FROM public.establishments
       WHERE id = establishment_id AND owner_id = auth.uid()
     )
@@ -186,7 +188,46 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 7. Índices para performance
+-- 7. RPC para agendamento atômico (evita race conditions)
+CREATE OR REPLACE FUNCTION public.book_appointment(
+  p_visitor_id UUID,
+  p_establishment_id UUID,
+  p_time_slot_id UUID,
+  p_status TEXT DEFAULT 'pending',
+  p_notes TEXT DEFAULT ''
+)
+RETURNS JSONB AS $$
+DECLARE
+  v_appointment RECORD;
+  v_available BOOLEAN;
+BEGIN
+  -- Verifica se o slot está disponível (com lock)
+  SELECT is_available INTO v_available
+  FROM public.time_slots
+  WHERE id = p_time_slot_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Horário não encontrado';
+  END IF;
+
+  IF NOT v_available THEN
+    RAISE EXCEPTION 'Horário já está ocupado';
+  END IF;
+
+  -- Marca slot como indisponível
+  UPDATE public.time_slots SET is_available = false WHERE id = p_time_slot_id;
+
+  -- Cria o agendamento
+  INSERT INTO public.appointments (visitor_id, establishment_id, time_slot_id, status, notes)
+  VALUES (p_visitor_id, p_establishment_id, p_time_slot_id, p_status, p_notes)
+  RETURNING * INTO v_appointment;
+
+  RETURN to_jsonb(v_appointment);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 8. Índices para performance
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
 CREATE INDEX IF NOT EXISTS idx_establishments_city ON public.establishments(city);
 CREATE INDEX IF NOT EXISTS idx_establishments_owner ON public.establishments(owner_id);

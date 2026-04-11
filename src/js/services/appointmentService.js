@@ -1,22 +1,48 @@
 import { supabase } from '../supabaseClient.js';
+import { sanitizeInput } from '../utils/validators.js';
 
 /**
- * Cria novo agendamento
+ * Cria novo agendamento usando RPC para atomicidade
+ * Usa uma função no banco para evitar race conditions
  */
 export async function createAppointment(data) {
-  const { data: result, error } = await supabase
-    .from('appointments')
-    .insert([data])
-    .select()
-    .single();
-  if (error) throw error;
+  // Sanitiza notas do usuário
+  const sanitizedData = {
+    ...data,
+    notes: sanitizeInput(data.notes || ''),
+  };
 
-  // Marca o slot como indisponível
-  if (data.time_slot_id) {
-    await supabase
-      .from('time_slots')
-      .update({ is_available: false })
-      .eq('id', data.time_slot_id);
+  // Tenta usar a RPC atômica primeiro
+  const { data: result, error: rpcError } = await supabase
+    .rpc('book_appointment', {
+      p_visitor_id: sanitizedData.visitor_id,
+      p_establishment_id: sanitizedData.establishment_id,
+      p_time_slot_id: sanitizedData.time_slot_id,
+      p_status: sanitizedData.status || 'pending',
+      p_notes: sanitizedData.notes,
+    });
+
+  if (rpcError) {
+    // Fallback: se a RPC não existir, usa insert direto
+    if (rpcError.message?.includes('function') || rpcError.code === '42883') {
+      const { data: insertResult, error: insertError } = await supabase
+        .from('appointments')
+        .insert([sanitizedData])
+        .select()
+        .single();
+      if (insertError) throw insertError;
+
+      // Marca o slot como indisponível
+      if (sanitizedData.time_slot_id) {
+        await supabase
+          .from('time_slots')
+          .update({ is_available: false })
+          .eq('id', sanitizedData.time_slot_id);
+      }
+
+      return insertResult;
+    }
+    throw rpcError;
   }
 
   return result;
@@ -77,3 +103,4 @@ export async function updateAppointmentStatus(id, status) {
 export async function cancelAppointment(id) {
   return updateAppointmentStatus(id, 'cancelled');
 }
+
