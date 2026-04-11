@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   root: 'src',
+  envDir: '../',
   base: '/atividade-avaliativa-qualidade-de-software/',
   build: {
     outDir: '../dist',
