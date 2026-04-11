@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AgendaFácil — Sistema de agendamentos online com filtro por cidades e múltiplos níveis de acesso" />
+  <meta name="keywords" content="agendamento, scheduling, estabelecimento, visitante" />
+  <meta name="author" content="Gabriel Sanches de Souza, Higo da Silva Monteiro de Souza" />
+  <title>AgendaFácil — Agendamentos Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>" />
+</head>
+<body>
+  <!-- Loading screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Carregando AgendaFácil...</p>
+  </div>
+
+  <!-- Background animated orbs -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- App wrapper -->
+  <div id="app" class="app" style="display:none;">
+    <!-- Header / Navbar -->
+    <header id="app-header" class="app-header">
+      <div class="header-content">
+        <div class="header-brand">
+          <span class="brand-icon">📅</span>
+          <h1 class="brand-name">AgendaFácil</h1>
+          <span class="brand-badge">v1.0</span>
+        </div>
+        <nav id="app-nav" class="app-nav" aria-label="Navegação principal">
+          <!-- Nav items injected by JS based on role -->
+        </nav>
+        <div id="user-menu" class="user-menu" style="display:none;">
+          <button id="user-avatar-btn" class="user-avatar-btn" aria-label="Menu do usuário">
+            <span id="user-initials" class="user-initials">?</span>
+          </button>
+          <div id="user-dropdown" class="user-dropdown" style="display:none;">
+            <p id="user-name-display" class="user-name-display"></p>
+            <p id="user-role-display" class="user-role-display"></p>
+            <hr />
+            <button id="btn-logout" class="btn-dropdown" type="button">Sair</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main id="main-content" class="main-content">
+      <!-- Views are injected here by the router -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>© 2026 AgendaFácil — Gabriel Sanches de Souza & Higo da Silva Monteiro de Souza</p>
+    </footer>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
