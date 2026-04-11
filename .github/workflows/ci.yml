@@ -2,7 +2,7 @@ name: CI - Testes e Deploy
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, dev_]
   pull_request:
     branches: [main, master]
 
@@ -26,7 +26,7 @@ jobs:
           cache: "npm"
 
       - name: Instalar dependências
-        run: npm ci
+        run: npm install
 
       - name: Rodar testes com coverage
         run: npm test -- --coverage
