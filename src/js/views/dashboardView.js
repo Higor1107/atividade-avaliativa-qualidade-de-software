@@ -2,7 +2,7 @@
  * dashboardView.js — Painel principal adaptativo por role
  */
 import { getMyEstablishment } from '../services/establishmentService.js';
-import { getMyAppointments, getEstablishmentAppointments } from '../services/appointmentService.js';
+import { getMyAppointments, getEstablishmentAppointments, updateAppointmentStatus } from '../services/appointmentService.js';
 import { formatDate, formatTime, getDayOfWeek } from '../utils/dateUtils.js';
 import { formatStatus, formatRole, generateInitials, getStatusColor, formatCount } from '../utils/formatters.js';
 
@@ -70,11 +70,17 @@ async function renderEstablishmentDashboard(container, profile, navigate) {
                 <div class="apt-day">${slot?.slot_date ? slot.slot_date.split('-')[2] : '--'}</div>
                 <div class="apt-month">${slot?.slot_date ? slot.slot_date.split('-')[1] : ''}</div>
               </div>
-              <div class="appointment-info">
+              <div class="appointment-info" style="flex: 1;">
                 <div class="apt-establishment">${visitor?.full_name || 'Visitante'}</div>
                 <div class="apt-time">${slot ? formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time) : 'Horário não definido'}</div>
               </div>
-              <span class="badge ${getStatusColor(apt.status)}">${formatStatus(apt.status)}</span>
+              <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                <span class="badge ${getStatusColor(apt.status)}">${formatStatus(apt.status)}</span>
+                ${apt.status === 'pending' ? `
+                  <button class="btn btn-primary btn-sm btn-confirm-apt" data-apt-id="${apt.id}">✓</button>
+                  <button class="btn btn-danger btn-sm btn-cancel-apt" data-apt-id="${apt.id}">✕</button>
+                ` : ''}
+              </div>
             </div>
           `;
         }).join('')}
@@ -89,6 +95,33 @@ async function renderEstablishmentDashboard(container, profile, navigate) {
       <button class="btn btn-ghost" id="btn-go-establishment">Editar Estabelecimento</button>
     </div>
   `;
+
+  // Action listeners for confirm/cancel
+  document.querySelectorAll('.btn-confirm-apt').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const aptId = e.target.dataset.aptId;
+      try {
+        await updateAppointmentStatus(aptId, 'confirmed');
+        renderDashboardView(container, profile, navigate);
+      } catch (err) {
+        alert(err.message || 'Erro ao confirmar agendamento');
+      }
+    });
+  });
+
+  document.querySelectorAll('.btn-cancel-apt').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const aptId = e.target.dataset.aptId;
+      if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+        try {
+          await updateAppointmentStatus(aptId, 'cancelled');
+          renderDashboardView(container, profile, navigate);
+        } catch (err) {
+          alert(err.message || 'Erro ao cancelar agendamento');
+        }
+      }
+    });
+  });
 
   document.getElementById('btn-go-calendar')?.addEventListener('click', () => navigate('calendar'));
   document.getElementById('btn-go-establishment')?.addEventListener('click', () => navigate('establishment'));
