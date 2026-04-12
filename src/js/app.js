@@ -49,11 +49,11 @@ function navigate(route) {
 
 function getNavItems(role) {
   const items = [
-    { route: 'dashboard', label: '📊 Painel', roles: ['developer', 'establishment', 'visitor'] },
-    { route: 'calendar', label: '📅 Calendário', roles: ['developer', 'establishment'] },
-    { route: 'establishment', label: '🏢 Meu Estab.', roles: ['developer', 'establishment'] },
-    { route: 'browse', label: '🔍 Buscar', roles: ['visitor'] },
-    { route: 'appointments', label: '📋 Agendamentos', roles: ['visitor'] },
+    { route: 'dashboard', label: 'Painel', roles: ['establishment', 'visitor'] },
+    { route: 'calendar', label: 'Calendário', roles: ['establishment'] },
+    { route: 'establishment', label: 'Meu Estab.', roles: ['establishment'] },
+    { route: 'browse', label: 'Buscar Especialistas', roles: ['visitor'] },
+    { route: 'appointments', label: 'Meus Agendamentos', roles: ['visitor'] },
   ];
   return items.filter((item) => item.roles.includes(role));
 }
@@ -136,8 +136,7 @@ async function handleRoute() {
   } catch (err) {
     mainContent.innerHTML = `
       <div class="glass-card empty-state">
-        <div class="empty-icon">⚠️</div>
-        <p>Erro ao carregar página: ${err.message || 'Erro desconhecido'}</p>
+        <p>Aviso: ${err.message || 'Erro desconhecido'}</p>
       </div>
     `;
   }

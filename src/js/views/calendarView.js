@@ -24,8 +24,7 @@ export async function renderCalendarView(container, profile, showToast) {
   if (!establishment) {
     container.innerHTML = `
       <div class="glass-card empty-state">
-        <div class="empty-icon">🏢</div>
-        <p>Configure seu estabelecimento primeiro para gerenciar horários.</p>
+        <p>Aviso: Configure seu estabelecimento primeiro para gerenciar horários.</p>
       </div>
     `;
     return;
@@ -45,7 +44,7 @@ export async function renderCalendarView(container, profile, showToast) {
 
     container.innerHTML = `
       <div class="dashboard-header">
-        <h2>📅 Calendário de Horários</h2>
+        <h2>Calendário de Horários</h2>
         <p>${establishment.name}</p>
       </div>
 
@@ -85,13 +84,12 @@ export async function renderCalendarView(container, profile, showToast) {
               <div class="slot-item">
                 <div>
                   <div class="slot-time">${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}</div>
-                  <div class="slot-status">${slot.is_available ? '🟢 Disponível' : '🔴 Ocupado'}</div>
+                  <div class="slot-status">${slot.is_available ? 'Disponível' : 'Ocupado'}</div>
                 </div>
                 ${slot.is_available ? `<button class="btn btn-danger btn-sm" data-delete-slot="${slot.id}">✕</button>` : ''}
               </div>
             `).join('') : `
               <div class="empty-state" style="padding:var(--space-xl);">
-                <div class="empty-icon">🕐</div>
                 <p>Nenhum horário neste dia</p>
               </div>
             `}

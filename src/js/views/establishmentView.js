@@ -21,7 +21,7 @@ export async function renderEstablishmentSetupView(container, profile, showToast
 
   container.innerHTML = `
     <div class="dashboard-header">
-      <h2>🏢 ${isEdit ? 'Editar' : 'Cadastrar'} Estabelecimento</h2>
+      <h2>${isEdit ? 'Editar' : 'Cadastrar'} Estabelecimento</h2>
       <p>${isEdit ? 'Atualize os dados do seu estabelecimento' : 'Configure seu estabelecimento para começar a receber agendamentos'}</p>
     </div>
 
@@ -144,12 +144,11 @@ export async function renderBrowseView(container, profile, showToast) {
       <div class="glass-card establishment-card" data-est-id="${est.id}">
         <div class="est-name">${est.name}</div>
         ${est.category ? `<div class="est-category">${est.category}</div>` : ''}
-        <div class="est-city">📍 ${est.city || 'Cidade não informada'}</div>
+        <div class="est-city">Local: ${est.city || 'Cidade não informada'}</div>
         ${est.description ? `<p style="color:var(--text-secondary);font-size:var(--font-sm);margin-top:var(--space-sm);">${est.description.substring(0, 100)}${est.description.length > 100 ? '...' : ''}</p>` : ''}
       </div>
     `).join('') : `
       <div class="glass-card empty-state">
-        <div class="empty-icon">🔍</div>
         <p>Nenhum estabelecimento encontrado</p>
       </div>
     `;
@@ -189,7 +188,7 @@ export async function renderBrowseView(container, profile, showToast) {
           <button class="modal-close" id="modal-close">✕</button>
         </div>
         ${est.category ? `<p style="color:var(--accent-violet-light);font-size:var(--font-sm);margin-bottom:var(--space-sm);">${est.category}</p>` : ''}
-        <p style="color:var(--text-secondary);margin-bottom:var(--space-md);">📍 ${est.city || ''} ${est.address ? '· ' + est.address : ''}</p>
+        <p style="color:var(--text-secondary);margin-bottom:var(--space-md);">Local: ${est.city || ''} ${est.address ? '· ' + est.address : ''}</p>
         ${est.description ? `<p style="margin-bottom:var(--space-lg);">${est.description}</p>` : ''}
 
         <div class="form-group">
@@ -269,13 +268,13 @@ export async function renderBrowseView(container, profile, showToast) {
   // Initial render
   container.innerHTML = `
     <div class="dashboard-header">
-      <h2>🔍 Buscar Estabelecimentos</h2>
+      <h2>Buscar Especialistas</h2>
       <p>Encontre estabelecimentos e agende sua visita</p>
     </div>
 
     <div class="filter-bar">
-      <input class="form-input" type="text" id="filter-name" placeholder="🔍 Buscar por nome..." />
-      <input class="form-input" type="text" id="filter-city" placeholder="📍 Filtrar por cidade..." />
+      <input class="form-input" type="text" id="filter-name" placeholder="Buscar por nome..." />
+      <input class="form-input" type="text" id="filter-city" placeholder="Filtrar por cidade..." />
     </div>
 
     <div class="establishment-grid" id="establishments-list"></div>
