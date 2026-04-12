@@ -1,14 +1,4 @@
--- Execute este código no SQL Editor do seu Supabase para aplicar a estrutura de Serviços:
-
--- 1. Adiciona a coluna de serviços na tabela de estabelecimentos
-ALTER TABLE public.establishments 
-ADD COLUMN IF NOT EXISTS services JSONB DEFAULT '[]'::jsonb;
-
--- 2. Adiciona a coluna do tipo de serviço na tabela de agendamentos
-ALTER TABLE public.appointments 
-ADD COLUMN IF NOT EXISTS service_type TEXT DEFAULT '';
-
--- 3. Atualiza a Função RPC de agendamentos para incluir o serviço
+-- [PATCH SEC-001] Execute no Supabase para fechar a brecha de segurança no RPC (IDOR)
 CREATE OR REPLACE FUNCTION public.book_appointment(
   p_visitor_id UUID,
   p_establishment_id UUID,
@@ -22,6 +12,11 @@ DECLARE
   v_appointment RECORD;
   v_available BOOLEAN;
 BEGIN
+  -- Validação de segurança: garante que o visitante é o usuário autenticado
+  IF p_visitor_id <> auth.uid() THEN
+    RAISE EXCEPTION 'Operação não autorizada';
+  END IF;
+
   -- Verifica se o slot está disponível (com lock)
   SELECT is_available INTO v_available
   FROM public.time_slots

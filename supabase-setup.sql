@@ -204,6 +204,11 @@ DECLARE
   v_appointment RECORD;
   v_available BOOLEAN;
 BEGIN
+  -- Validação de segurança: garante que o visitante é o usuário autenticado
+  IF p_visitor_id <> auth.uid() THEN
+    RAISE EXCEPTION 'Operação não autorizada';
+  END IF;
+
   -- Verifica se o slot está disponível (com lock)
   SELECT is_available INTO v_available
   FROM public.time_slots
