@@ -37,6 +37,7 @@ export async function renderVisitorView(container, profile, showToast) {
         <button class="tab-btn ${statusFilter === '' ? 'active' : ''}" data-status="">Todos</button>
         <button class="tab-btn ${statusFilter === 'pending' ? 'active' : ''}" data-status="pending">Pendentes</button>
         <button class="tab-btn ${statusFilter === 'confirmed' ? 'active' : ''}" data-status="confirmed">Confirmados</button>
+        <button class="tab-btn ${statusFilter === 'completed' ? 'active' : ''}" data-status="completed">Concluídos</button>
         <button class="tab-btn ${statusFilter === 'cancelled' ? 'active' : ''}" data-status="cancelled">Cancelados</button>
       </div>
 
@@ -60,6 +61,7 @@ export async function renderVisitorView(container, profile, showToast) {
                     ${est?.city ? ' · ' + est.city : ''}
                     ${dateStr ? ' · ' + getDayOfWeek(dateStr) : ''}
                   </div>
+                  ${apt.service_type ? `<div style="font-size:var(--font-xs);color:var(--text-primary);font-weight:600;margin-top:2px;">Serviço: ${apt.service_type}</div>` : ''}
                   ${apt.notes ? `<div style="font-size:var(--font-xs);color:var(--text-muted);margin-top:2px;">Nota: ${apt.notes}</div>` : ''}
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-xs);">

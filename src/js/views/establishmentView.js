@@ -60,6 +60,12 @@ export async function renderEstablishmentSetupView(container, profile, showToast
           <textarea class="form-input form-textarea" id="est-description" placeholder="Descreva seu estabelecimento...">${establishment?.description || ''}</textarea>
         </div>
 
+        <div class="form-group">
+          <label class="form-label" for="services">Tipos de Serviço</label>
+          <input class="form-input" type="text" id="services" value="${establishment?.services ? (Array.isArray(establishment.services) ? establishment.services.join(', ') : establishment.services) : ''}" placeholder="Ex: Consulta, Exame, Cirurgia (separados por vírgula)" />
+          <small style="color:var(--text-secondary);font-size:var(--font-xs);">Especifique os serviços prestados separados por vírgula para que o visitante possa selecionar ao agendar.</small>
+        </div>
+
         <div style="display:flex;gap:var(--space-sm);">
           <button type="submit" class="btn btn-primary btn-lg" id="btn-save-est">${isEdit ? 'Salvar Alterações' : 'Cadastrar'}</button>
           <button type="button" class="btn btn-ghost btn-lg" id="btn-back-dashboard">Voltar</button>
@@ -76,13 +82,30 @@ export async function renderEstablishmentSetupView(container, profile, showToast
     btn.disabled = true;
     btn.textContent = 'Salvando...';
 
+    const name = document.getElementById('est-name').value.trim();
+    const category = document.getElementById('est-category').value.trim();
+    const city = document.getElementById('est-city').value.trim();
+    const phone = document.getElementById('est-phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const description = document.getElementById('est-description').value.trim();
+    const servicesInput = document.getElementById('services').value;
+    const services = servicesInput.split(',').map(s => s.trim()).filter(s => s !== '');
+
+    if (!name || !city || !phone) {
+      showToast('Nome, Cidade e Telefone são obrigatórios.', 'error');
+      btn.disabled = false;
+      btn.textContent = isEdit ? 'Salvar Alterações' : 'Cadastrar';
+      return;
+    }
+
     const data = {
-      name: document.getElementById('est-name').value.trim(),
-      category: document.getElementById('est-category').value.trim(),
-      city: document.getElementById('est-city').value.trim(),
-      phone: document.getElementById('est-phone').value.trim(),
-      address: document.getElementById('est-address').value.trim(),
-      description: document.getElementById('est-description').value.trim(),
+      name,
+      category,
+      city,
+      phone,
+      address,
+      description,
+      services
     };
 
     // Validate
@@ -196,6 +219,15 @@ export async function renderBrowseView(container, profile, showToast) {
           <input class="form-input" type="date" id="modal-date" value="${selectedDate}" min="${selectedDate}" />
         </div>
 
+        ${Array.isArray(est.services) && est.services.length > 0 ? `
+          <div class="form-group">
+            <label class="form-label">Tipo de Serviço</label>
+            <select class="form-input" id="modal-service">
+              ${est.services.map((s) => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+        ` : `<input type="hidden" id="modal-service" value="" />`}
+
         <h4 style="margin-bottom:var(--space-sm);">Horários Disponíveis</h4>
         <div id="modal-slots" class="slot-list" style="max-height:200px;">
           ${available.length > 0 ? available.map((s) => `
@@ -250,6 +282,7 @@ export async function renderBrowseView(container, profile, showToast) {
 
   async function bookSlot(estId, slotId, modal) {
     const notes = modal.querySelector('#modal-notes')?.value || '';
+    const service_type = modal.querySelector('#modal-service')?.value || '';
     try {
       await createAppointment({
         visitor_id: profile.id,
@@ -257,6 +290,7 @@ export async function renderBrowseView(container, profile, showToast) {
         time_slot_id: slotId,
         status: 'pending',
         notes,
+        service_type,
       });
       showToast('Agendamento realizado! Status: Pendente', 'success');
       modal.remove();

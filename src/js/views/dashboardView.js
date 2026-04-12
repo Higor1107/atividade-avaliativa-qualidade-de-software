@@ -73,12 +73,16 @@ async function renderEstablishmentDashboard(container, profile, navigate) {
               <div class="appointment-info" style="flex: 1;">
                 <div class="apt-establishment">${visitor?.full_name || 'Visitante'}</div>
                 <div class="apt-time">${slot ? formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time) : 'Horário não definido'}</div>
+                ${apt.service_type ? `<div style="font-size:var(--font-xs);color:var(--text-muted);margin-top:2px;">Serviço: ${apt.service_type}</div>` : ''}
               </div>
               <div style="display: flex; gap: var(--space-xs); align-items: center;">
                 <span class="badge ${getStatusColor(apt.status)}">${formatStatus(apt.status)}</span>
                 ${apt.status === 'pending' ? `
                   <button class="btn btn-primary btn-sm btn-confirm-apt" data-apt-id="${apt.id}">✓</button>
                   <button class="btn btn-danger btn-sm btn-cancel-apt" data-apt-id="${apt.id}">✕</button>
+                ` : ''}
+                ${apt.status === 'confirmed' ? `
+                  <button class="btn btn-secondary btn-sm btn-complete-apt" data-apt-id="${apt.id}" title="Encerrar / Concluir este agendamento">⚐</button>
                 ` : ''}
               </div>
             </div>
@@ -118,6 +122,20 @@ async function renderEstablishmentDashboard(container, profile, navigate) {
           renderDashboardView(container, profile, navigate);
         } catch (err) {
           alert(err.message || 'Erro ao cancelar agendamento');
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.btn-complete-apt').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const aptId = e.target.dataset.aptId;
+      if (confirm('Marcar este agendamento como CONCLUÍDO (Encerrado)?')) {
+        try {
+          await updateAppointmentStatus(aptId, 'completed');
+          renderDashboardView(container, profile, navigate);
+        } catch (err) {
+          alert(err.message || 'Erro ao encerrar agendamento');
         }
       }
     });

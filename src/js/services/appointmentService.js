@@ -20,6 +20,7 @@ export async function createAppointment(data) {
       p_time_slot_id: sanitizedData.time_slot_id,
       p_status: sanitizedData.status || 'pending',
       p_notes: sanitizedData.notes,
+      p_service_type: sanitizedData.service_type || ''
     });
 
   if (rpcError) {
