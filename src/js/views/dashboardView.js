@@ -21,7 +21,7 @@ export async function renderDashboardView(container, profile, navigate) {
   try {
     const role = profile.role;
 
-    if (role === 'developer' || role === 'establishment') {
+    if (role === 'establishment') {
       await renderEstablishmentDashboard(container, profile, navigate);
     } else {
       await renderVisitorDashboard(container, profile, navigate);

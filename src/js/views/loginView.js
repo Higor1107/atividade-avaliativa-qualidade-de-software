@@ -33,17 +33,13 @@ export function renderLoginView(container, onLoginSuccess) {
               <div class="form-group">
                 <label class="form-label">Tipo de Conta</label>
                 <div class="role-selector">
-                  <div class="role-option ${selectedRole === 'developer' ? 'selected' : ''}" data-role="developer">
-                    <span class="role-icon">👨‍💻</span>
-                    <span class="role-name">Desenvolvedor</span>
-                  </div>
-                  <div class="role-option ${selectedRole === 'establishment' ? 'selected' : ''}" data-role="establishment">
-                    <span class="role-icon">🏢</span>
-                    <span class="role-name">Estabelecimento</span>
-                  </div>
                   <div class="role-option ${selectedRole === 'visitor' ? 'selected' : ''}" data-role="visitor">
                     <span class="role-icon">👤</span>
-                    <span class="role-name">Visitante</span>
+                    <span class="role-name">Visitante / Paciente</span>
+                  </div>
+                  <div class="role-option ${selectedRole === 'establishment' ? 'selected' : ''}" data-role="establishment">
+                    <span class="role-icon">🏥</span>
+                    <span class="role-name">Clínica / Especialista</span>
                   </div>
                 </div>
               </div>
