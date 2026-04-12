@@ -86,7 +86,7 @@ export async function renderEstablishmentSetupView(container, profile, showToast
     const category = document.getElementById('est-category').value.trim();
     const city = document.getElementById('est-city').value.trim();
     const phone = document.getElementById('est-phone').value.trim();
-    const address = document.getElementById('address').value.trim();
+    const address = document.getElementById('est-address').value.trim();
     const description = document.getElementById('est-description').value.trim();
     const servicesInput = document.getElementById('services').value;
     const services = servicesInput.split(',').map(s => s.trim()).filter(s => s !== '');
