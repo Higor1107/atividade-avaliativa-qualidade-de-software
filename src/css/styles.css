@@ -1101,6 +1101,55 @@ body {
 /* ══════════════════════════════════════════
    Responsive
    ══════════════════════════════════════════ */
+/* Custom Spinner Time Picker */
+.custom-time-picker {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-xs);
+  flex: 1;
+  justify-content: center;
+}
+
+.time-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.btn-spinner {
+  background: none;
+  border: none;
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px;
+}
+.btn-spinner:hover {
+  color: var(--accent-blue);
+}
+
+.spinner-input {
+  width: 32px;
+  text-align: center;
+  border: none;
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 0;
+  margin: 0;
+  outline: none;
+  pointer-events: none;
+  background: transparent;
+}
+
+.time-colon {
+  font-weight: 600;
+  margin: 0 4px;
+  color: var(--text-primary);
+}
 @media (max-width: 900px) {
   .calendar-container {
     grid-template-columns: 1fr;
