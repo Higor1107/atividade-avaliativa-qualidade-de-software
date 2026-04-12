@@ -38,6 +38,24 @@ export async function renderCalendarView(container, profile, showToast) {
     }
   }
 
+  function renderTimePicker(idPrefix, defaultH, defaultM) {
+    return \`
+      <div class="custom-time-picker" data-id="\${idPrefix}">
+        <div class="time-spinner">
+          <button type="button" class="btn-spinner up" data-target="\${idPrefix}-hh">▲</button>
+          <input type="text" class="spinner-input time-hh" id="\${idPrefix}-hh" value="\${defaultH}" readonly />
+          <button type="button" class="btn-spinner down" data-target="\${idPrefix}-hh">▼</button>
+        </div>
+        <span class="time-colon">:</span>
+        <div class="time-spinner">
+          <button type="button" class="btn-spinner up" data-target="\${idPrefix}-mm">▲</button>
+          <input type="text" class="spinner-input time-mm" id="\${idPrefix}-mm" value="\${defaultM}" readonly />
+          <button type="button" class="btn-spinner down" data-target="\${idPrefix}-mm">▼</button>
+        </div>
+      </div>
+    \`;
+  }
+
   async function render() {
     await loadSlots();
     const days = generateCalendarDays(currentYear, currentMonth);
@@ -73,10 +91,18 @@ export async function renderCalendarView(container, profile, showToast) {
         <div class="glass-card slots-panel">
           <h3>Horários — ${formatDate(selectedDate)}</h3>
 
-          <div style="display:flex;gap:var(--space-sm);margin:var(--space-md) 0;">
-            <input class="form-input" type="time" id="input-start-time" style="flex:1;" />
-            <input class="form-input" type="time" id="input-end-time" style="flex:1;" />
-            <button class="btn btn-primary btn-sm" id="btn-add-slot">+</button>
+          <div style="display:flex;gap:var(--space-sm);margin:var(--space-md) 0;align-items:center;">
+            <div style="display:flex;flex:1;flex-direction:column;">
+              <label class="form-label" style="font-size:var(--font-xs);margin-bottom:2px;">Início</label>
+              \${renderTimePicker('start', '09', '00')}
+            </div>
+            <div style="display:flex;flex:1;flex-direction:column;">
+              <label class="form-label" style="font-size:var(--font-xs);margin-bottom:2px;">Fim</label>
+              \${renderTimePicker('end', '10', '00')}
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+              <button class="btn btn-primary btn-sm" style="height:38px;" id="btn-add-slot">+</button>
+            </div>
           </div>
 
           <div class="slot-list" id="slot-list">
@@ -118,10 +144,34 @@ export async function renderCalendarView(container, profile, showToast) {
       });
     });
 
+    // Spinner Logic
+    function pad(n) { return n < 10 ? '0' + n : n; }
+    container.querySelectorAll('.btn-spinner').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        let val = parseInt(input.value, 10);
+        
+        if (targetId.endsWith('-hh')) {
+          if (btn.classList.contains('up')) val = (val + 1) % 24;
+          if (btn.classList.contains('down')) val = (val - 1 + 24) % 24;
+        } else {
+          if (btn.classList.contains('up')) val = (val + 1) % 60;
+          if (btn.classList.contains('down')) val = (val - 1 + 60) % 60;
+        }
+        input.value = pad(val);
+      });
+    });
+
     // Add slot
     document.getElementById('btn-add-slot').addEventListener('click', async () => {
-      const start = document.getElementById('input-start-time').value;
-      const end = document.getElementById('input-end-time').value;
+      const startHH = document.getElementById('start-hh').value;
+      const startMM = document.getElementById('start-mm').value;
+      const endHH = document.getElementById('end-hh').value;
+      const endMM = document.getElementById('end-mm').value;
+
+      const start = \`\${startHH}:\${startMM}\`;
+      const end = \`\${endHH}:\${endMM}\`;
 
       if (!isValidTimeRange(start, end)) {
         showToast('Horário inválido. Início deve ser antes do fim.', 'error');
