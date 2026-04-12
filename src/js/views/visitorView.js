@@ -29,7 +29,7 @@ export async function renderVisitorView(container, profile, showToast) {
 
     container.innerHTML = `
       <div class="dashboard-header">
-        <h2>📋 Meus Agendamentos</h2>
+        <h2>Meus Agendamentos</h2>
         <p>${formatCount(appointments.length, 'agendamento', 'agendamentos')} no total</p>
       </div>
 
@@ -37,6 +37,7 @@ export async function renderVisitorView(container, profile, showToast) {
         <button class="tab-btn ${statusFilter === '' ? 'active' : ''}" data-status="">Todos</button>
         <button class="tab-btn ${statusFilter === 'pending' ? 'active' : ''}" data-status="pending">Pendentes</button>
         <button class="tab-btn ${statusFilter === 'confirmed' ? 'active' : ''}" data-status="confirmed">Confirmados</button>
+        <button class="tab-btn ${statusFilter === 'completed' ? 'active' : ''}" data-status="completed">Concluídos</button>
         <button class="tab-btn ${statusFilter === 'cancelled' ? 'active' : ''}" data-status="cancelled">Cancelados</button>
       </div>
 
@@ -60,7 +61,8 @@ export async function renderVisitorView(container, profile, showToast) {
                     ${est?.city ? ' · ' + est.city : ''}
                     ${dateStr ? ' · ' + getDayOfWeek(dateStr) : ''}
                   </div>
-                  ${apt.notes ? `<div style="font-size:var(--font-xs);color:var(--text-muted);margin-top:2px;">📝 ${apt.notes}</div>` : ''}
+                  ${apt.service_type ? `<div style="font-size:var(--font-xs);color:var(--text-primary);font-weight:600;margin-top:2px;">Serviço: ${apt.service_type}</div>` : ''}
+                  ${apt.notes ? `<div style="font-size:var(--font-xs);color:var(--text-muted);margin-top:2px;">Nota: ${apt.notes}</div>` : ''}
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-xs);">
                   <span class="badge ${getStatusColor(apt.status)}">${formatStatus(apt.status)}</span>
@@ -74,7 +76,6 @@ export async function renderVisitorView(container, profile, showToast) {
         </div>
       ` : `
         <div class="glass-card empty-state">
-          <div class="empty-icon">📭</div>
           <p>${statusFilter ? 'Nenhum agendamento com este status' : 'Você ainda não tem agendamentos'}</p>
         </div>
       `}

@@ -43,9 +43,8 @@ export function formatStatus(status) {
  */
 export function formatRole(role) {
   const map = {
-    developer: 'Desenvolvedor',
     establishment: 'Estabelecimento',
-    visitor: 'Visitante',
+    visitor: 'Visitante / Paciente',
   };
   if (!role || typeof role !== 'string') return '';
   return map[role.toLowerCase()] || role;

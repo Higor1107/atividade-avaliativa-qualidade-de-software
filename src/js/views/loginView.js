@@ -10,16 +10,16 @@ export function renderLoginView(container, onLoginSuccess) {
 
   function render() {
     container.innerHTML = `
-      <div class="login-container">
-        <div class="glass-card login-card">
-          <div class="login-header">
-            <h2>${isLogin ? 'Entrar' : 'Criar Conta'}</h2>
-            <p>${isLogin ? 'Bem-vindo de volta!' : 'Preencha seus dados para começar'}</p>
-          </div>
-
-          <div class="login-toggle">
-            <button type="button" class="login-toggle-btn ${isLogin ? 'active' : ''}" id="btn-login-tab">Entrar</button>
-            <button type="button" class="login-toggle-btn ${!isLogin ? 'active' : ''}" id="btn-register-tab">Criar Conta</button>
+      <div class="dor-layout" style="margin-top: var(--space-2xl);">
+        <div class="dor-title-col">
+          <h2>Vamos começar</h2>
+          <p>Faça login ou crie uma conta para buscar e agendar consultas.</p>
+        </div>
+        
+        <div class="dor-content-col">
+          <div class="dor-tabs">
+            <button type="button" class="dor-tab-btn ${isLogin ? 'active' : ''}" id="btn-login-tab">Já tenho conta</button>
+            <button type="button" class="dor-tab-btn ${!isLogin ? 'active' : ''}" id="btn-register-tab">Novo cadastro</button>
           </div>
 
           <form id="auth-form">
@@ -33,17 +33,11 @@ export function renderLoginView(container, onLoginSuccess) {
               <div class="form-group">
                 <label class="form-label">Tipo de Conta</label>
                 <div class="role-selector">
-                  <div class="role-option ${selectedRole === 'developer' ? 'selected' : ''}" data-role="developer">
-                    <span class="role-icon">👨‍💻</span>
-                    <span class="role-name">Desenvolvedor</span>
+                  <div class="role-option ${selectedRole === 'visitor' ? 'selected' : ''}" data-role="visitor">
+                    <span class="role-name">Paciente</span>
                   </div>
                   <div class="role-option ${selectedRole === 'establishment' ? 'selected' : ''}" data-role="establishment">
-                    <span class="role-icon">🏢</span>
-                    <span class="role-name">Estabelecimento</span>
-                  </div>
-                  <div class="role-option ${selectedRole === 'visitor' ? 'selected' : ''}" data-role="visitor">
-                    <span class="role-icon">👤</span>
-                    <span class="role-name">Visitante</span>
+                    <span class="role-name">Clínica / Médicos</span>
                   </div>
                 </div>
               </div>
@@ -74,8 +68,8 @@ export function renderLoginView(container, onLoginSuccess) {
               <span class="form-error" id="error-password"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block" id="btn-submit">
-              ${isLogin ? 'Entrar' : 'Criar Conta'}
+            <button type="submit" class="btn btn-primary btn-lg btn-block" style="margin-top: var(--space-md);" id="btn-submit">
+              ${isLogin ? 'Acessar Conta' : 'Concluir Cadastro'}
             </button>
           </form>
         </div>

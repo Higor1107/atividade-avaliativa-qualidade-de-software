@@ -66,8 +66,8 @@ describe('formatStatus', () => {
 
 // ────────────── formatRole ──────────────
 describe('formatRole', () => {
-  it('deve traduzir developer', () => {
-    expect(formatRole('developer')).toBe('Desenvolvedor');
+  it('deve retornar a string original se não reconhecida (ex: developer)', () => {
+    expect(formatRole('developer')).toBe('developer');
   });
 
   it('deve traduzir establishment', () => {
@@ -75,11 +75,11 @@ describe('formatRole', () => {
   });
 
   it('deve traduzir visitor', () => {
-    expect(formatRole('visitor')).toBe('Visitante');
+    expect(formatRole('visitor')).toBe('Visitante / Paciente');
   });
 
-  it('deve ser case-insensitive', () => {
-    expect(formatRole('DEVELOPER')).toBe('Desenvolvedor');
+  it('deve ser case-insensitive na pesquisa da key', () => {
+    expect(formatRole('ESTABLISHMENT')).toBe('Estabelecimento');
   });
 
   it('deve retornar vazio para null', () => {
