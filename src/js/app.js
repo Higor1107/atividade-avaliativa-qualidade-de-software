@@ -59,10 +59,17 @@ function getNavItems(role) {
 }
 
 function renderNav() {
+  const brandBadge = document.getElementById('brand-role-badge');
+
   if (!currentProfile) {
     appNav.innerHTML = '';
     userMenu.style.display = 'none';
+    if (brandBadge) brandBadge.textContent = 'PORTAL';
     return;
+  }
+
+  if (brandBadge) {
+    brandBadge.textContent = currentProfile.role === 'visitor' ? 'PACIENTE' : 'ESTABELECIMENTO';
   }
 
   const items = getNavItems(currentProfile.role);

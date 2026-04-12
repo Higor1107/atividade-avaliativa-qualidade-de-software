@@ -5,6 +5,7 @@ import { getMyEstablishment } from '../services/establishmentService.js';
 import { getMyAppointments, getEstablishmentAppointments, updateAppointmentStatus } from '../services/appointmentService.js';
 import { formatDate, formatTime, getDayOfWeek } from '../utils/dateUtils.js';
 import { formatStatus, formatRole, generateInitials, getStatusColor, formatCount } from '../utils/formatters.js';
+import { filterByStatus, sortByDate } from '../utils/filters.js';
 
 export async function renderDashboardView(container, profile, navigate) {
   container.innerHTML = `
@@ -52,97 +53,124 @@ async function renderEstablishmentDashboard(container, profile, navigate) {
     return;
   }
 
-  const appointments = await getEstablishmentAppointments(establishment.id);
-  const recent = appointments.slice(0, 5);
-  
-  content.innerHTML = `
-    <div class="dor-tabs">
-      <div class="dor-tab-btn active">Agendamentos Recentes</div>
-    </div>
-    ${recent.length > 0 ? `
-      <div class="appointments-list">
-        ${recent.map((apt) => {
-          const slot = apt.time_slots;
-          const visitor = apt.profiles;
-          return `
-            <div class="glass-card appointment-card" style="margin-bottom: var(--space-sm);">
-              <div class="appointment-date">
-                <div class="apt-day">${slot?.slot_date ? slot.slot_date.split('-')[2] : '--'}</div>
-                <div class="apt-month">${slot?.slot_date ? slot.slot_date.split('-')[1] : ''}</div>
-              </div>
-              <div class="appointment-info" style="flex: 1;">
-                <div class="apt-establishment">${visitor?.full_name || 'Visitante'}</div>
-                <div class="apt-time">${slot ? formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time) : 'Horário não definido'}</div>
-                ${apt.service_type ? `<div style="font-size:var(--font-xs);color:var(--text-muted);margin-top:2px;">Serviço: ${apt.service_type}</div>` : ''}
-              </div>
-              <div style="display: flex; gap: var(--space-xs); align-items: center;">
-                <span class="badge ${getStatusColor(apt.status)}">${formatStatus(apt.status)}</span>
-                ${apt.status === 'pending' ? `
-                  <button class="btn btn-primary btn-sm btn-confirm-apt" data-apt-id="${apt.id}">✓</button>
-                  <button class="btn btn-danger btn-sm btn-cancel-apt" data-apt-id="${apt.id}">✕</button>
-                ` : ''}
-                ${apt.status === 'confirmed' ? `
-                  <button class="btn btn-secondary btn-sm btn-complete-apt" data-apt-id="${apt.id}" title="Encerrar / Concluir este agendamento">⚐</button>
-                ` : ''}
-              </div>
-            </div>
-          `;
-        }).join('')}
+  let appointments = await getEstablishmentAppointments(establishment.id);
+  let statusFilter = '';
+
+  function renderList() {
+    let filtered = appointments;
+    if (statusFilter) {
+      filtered = filterByStatus(filtered, statusFilter);
+    }
+    filtered = sortByDate(
+      filtered.map((a) => ({ ...a, date: a.time_slots?.slot_date || '' })),
+      false
+    );
+    
+    content.innerHTML = `
+      <div class="tabs" style="margin-bottom:var(--space-md);">
+        <button class="tab-btn ${statusFilter === '' ? 'active' : ''}" data-status="">Todos</button>
+        <button class="tab-btn ${statusFilter === 'pending' ? 'active' : ''}" data-status="pending">Pendentes</button>
+        <button class="tab-btn ${statusFilter === 'confirmed' ? 'active' : ''}" data-status="confirmed">Confirmados</button>
+        <button class="tab-btn ${statusFilter === 'completed' ? 'active' : ''}" data-status="completed">Concluídos</button>
+        <button class="tab-btn ${statusFilter === 'cancelled' ? 'active' : ''}" data-status="cancelled">Cancelados</button>
       </div>
-    ` : `
-      <div class="glass-card empty-state">
-        <p>Nenhum agendamento ainda</p>
+      ${filtered.length > 0 ? `
+        <div class="appointments-list">
+          ${filtered.map((apt) => {
+            const slot = apt.time_slots;
+            const visitor = apt.profiles;
+            return `
+              <div class="glass-card appointment-card" style="margin-bottom: var(--space-sm);">
+                <div class="appointment-date">
+                  <div class="apt-day">${slot?.slot_date ? slot.slot_date.split('-')[2] : '--'}</div>
+                  <div class="apt-month">${slot?.slot_date ? slot.slot_date.split('-')[1] : ''}</div>
+                </div>
+                <div class="appointment-info" style="flex: 1;">
+                  <div class="apt-establishment">${visitor?.full_name || 'Visitante'}</div>
+                  <div class="apt-time">${slot ? formatTime(slot.start_time) + ' - ' + formatTime(slot.end_time) : 'Horário não definido'}</div>
+                  ${apt.service_type ? `<div style="font-size:var(--font-xs);color:var(--text-muted);margin-top:2px;">Serviço: ${apt.service_type}</div>` : ''}
+                </div>
+                <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                  <span class="badge ${getStatusColor(apt.status)}">${formatStatus(apt.status)}</span>
+                  ${apt.status === 'pending' ? `
+                    <button class="btn btn-primary btn-sm btn-confirm-apt" data-apt-id="${apt.id}">✓</button>
+                    <button class="btn btn-danger btn-sm btn-cancel-apt" data-apt-id="${apt.id}">✕</button>
+                  ` : ''}
+                  ${apt.status === 'confirmed' ? `
+                    <button class="btn btn-secondary btn-sm btn-complete-apt" data-apt-id="${apt.id}" title="Encerrar / Concluir este agendamento">⚐</button>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : `
+        <div class="glass-card empty-state">
+          <p>${statusFilter ? 'Nenhum agendamento nesta categoria.' : 'Nenhum agendamento ainda.'}</p>
+        </div>
+      `}
+      <div style="margin-top:var(--space-lg);display:flex;gap:var(--space-sm);">
+        <button class="btn btn-primary" id="btn-go-calendar">Gerenciar Horários</button>
+        <button class="btn btn-ghost" id="btn-go-establishment">Editar Estabelecimento</button>
       </div>
-    `}
-    <div style="margin-top:var(--space-lg);display:flex;gap:var(--space-sm);">
-      <button class="btn btn-primary" id="btn-go-calendar">Gerenciar Horários</button>
-      <button class="btn btn-ghost" id="btn-go-establishment">Editar Estabelecimento</button>
-    </div>
-  `;
+    `;
 
-  // Action listeners for confirm/cancel
-  document.querySelectorAll('.btn-confirm-apt').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const aptId = e.target.dataset.aptId;
-      try {
-        await updateAppointmentStatus(aptId, 'confirmed');
-        renderDashboardView(container, profile, navigate);
-      } catch (err) {
-        alert(err.message || 'Erro ao confirmar agendamento');
-      }
+    // Reattach listeners
+    content.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        statusFilter = btn.dataset.status;
+        renderList();
+      });
     });
-  });
 
-  document.querySelectorAll('.btn-cancel-apt').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const aptId = e.target.dataset.aptId;
-      if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+    content.querySelectorAll('.btn-confirm-apt').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const aptId = e.target.dataset.aptId;
         try {
-          await updateAppointmentStatus(aptId, 'cancelled');
-          renderDashboardView(container, profile, navigate);
+          await updateAppointmentStatus(aptId, 'confirmed');
+          appointments = await getEstablishmentAppointments(establishment.id);
+          renderList();
         } catch (err) {
-          alert(err.message || 'Erro ao cancelar agendamento');
+          alert('Erro ao confirmar agendamento');
         }
-      }
+      });
     });
-  });
 
-  document.querySelectorAll('.btn-complete-apt').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const aptId = e.target.dataset.aptId;
-      if (confirm('Marcar este agendamento como CONCLUÍDO (Encerrado)?')) {
-        try {
-          await updateAppointmentStatus(aptId, 'completed');
-          renderDashboardView(container, profile, navigate);
-        } catch (err) {
-          alert(err.message || 'Erro ao encerrar agendamento');
+    content.querySelectorAll('.btn-cancel-apt').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const aptId = e.target.dataset.aptId;
+        if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+          try {
+            await updateAppointmentStatus(aptId, 'cancelled');
+            appointments = await getEstablishmentAppointments(establishment.id);
+            renderList();
+          } catch (err) {
+            alert('Erro ao cancelar agendamento');
+          }
         }
-      }
+      });
     });
-  });
 
-  document.getElementById('btn-go-calendar')?.addEventListener('click', () => navigate('calendar'));
-  document.getElementById('btn-go-establishment')?.addEventListener('click', () => navigate('establishment'));
+    content.querySelectorAll('.btn-complete-apt').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const aptId = e.target.dataset.aptId;
+        if (confirm('Marcar este agendamento como CONCLUÍDO (Encerrado)?')) {
+          try {
+            await updateAppointmentStatus(aptId, 'completed');
+            appointments = await getEstablishmentAppointments(establishment.id);
+            renderList();
+          } catch (err) {
+            alert('Erro ao encerrar agendamento');
+          }
+        }
+      });
+    });
+
+    document.getElementById('btn-go-calendar')?.addEventListener('click', () => navigate('calendar'));
+    document.getElementById('btn-go-establishment')?.addEventListener('click', () => navigate('establishment'));
+  }
+
+  renderList();
 }
 
 async function renderVisitorDashboard(container, profile, navigate) {
