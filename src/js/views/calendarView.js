@@ -39,21 +39,21 @@ export async function renderCalendarView(container, profile, showToast) {
   }
 
   function renderTimePicker(idPrefix, defaultH, defaultM) {
-    return \`
-      <div class="custom-time-picker" data-id="\${idPrefix}">
+    return `
+      <div class="custom-time-picker" data-id="${idPrefix}">
         <div class="time-spinner">
-          <button type="button" class="btn-spinner up" data-target="\${idPrefix}-hh">▲</button>
-          <input type="text" class="spinner-input time-hh" id="\${idPrefix}-hh" value="\${defaultH}" readonly />
-          <button type="button" class="btn-spinner down" data-target="\${idPrefix}-hh">▼</button>
+          <button type="button" class="btn-spinner up" data-target="${idPrefix}-hh">▲</button>
+          <input type="text" class="spinner-input time-hh" id="${idPrefix}-hh" value="${defaultH}" maxlength="2" />
+          <button type="button" class="btn-spinner down" data-target="${idPrefix}-hh">▼</button>
         </div>
         <span class="time-colon">:</span>
         <div class="time-spinner">
-          <button type="button" class="btn-spinner up" data-target="\${idPrefix}-mm">▲</button>
-          <input type="text" class="spinner-input time-mm" id="\${idPrefix}-mm" value="\${defaultM}" readonly />
-          <button type="button" class="btn-spinner down" data-target="\${idPrefix}-mm">▼</button>
+          <button type="button" class="btn-spinner up" data-target="${idPrefix}-mm">▲</button>
+          <input type="text" class="spinner-input time-mm" id="${idPrefix}-mm" value="${defaultM}" maxlength="2" />
+          <button type="button" class="btn-spinner down" data-target="${idPrefix}-mm">▼</button>
         </div>
       </div>
-    \`;
+    `;
   }
 
   async function render() {
@@ -94,11 +94,11 @@ export async function renderCalendarView(container, profile, showToast) {
           <div style="display:flex;gap:var(--space-sm);margin:var(--space-md) 0;align-items:center;">
             <div style="display:flex;flex:1;flex-direction:column;">
               <label class="form-label" style="font-size:var(--font-xs);margin-bottom:2px;">Início</label>
-              \${renderTimePicker('start', '09', '00')}
+              ${renderTimePicker('start', '09', '00')}
             </div>
             <div style="display:flex;flex:1;flex-direction:column;">
               <label class="form-label" style="font-size:var(--font-xs);margin-bottom:2px;">Fim</label>
-              \${renderTimePicker('end', '10', '00')}
+              ${renderTimePicker('end', '10', '00')}
             </div>
             <div style="display:flex;align-items:flex-end;">
               <button class="btn btn-primary btn-sm" style="height:38px;" id="btn-add-slot">+</button>
@@ -151,6 +151,7 @@ export async function renderCalendarView(container, profile, showToast) {
         const targetId = btn.dataset.target;
         const input = document.getElementById(targetId);
         let val = parseInt(input.value, 10);
+        if (isNaN(val)) val = 0;
         
         if (targetId.endsWith('-hh')) {
           if (btn.classList.contains('up')) val = (val + 1) % 24;
@@ -163,6 +164,23 @@ export async function renderCalendarView(container, profile, showToast) {
       });
     });
 
+    // Validacao input typing
+    container.querySelectorAll('.spinner-input').forEach((inp) => {
+      inp.addEventListener('change', () => {
+        let val = parseInt(inp.value, 10);
+        if (isNaN(val)) val = 0;
+        
+        if (inp.id.endsWith('-hh')) {
+          if (val > 23) val = 23;
+          if (val < 0) val = 0;
+        } else {
+          if (val > 59) val = 59;
+          if (val < 0) val = 0;
+        }
+        inp.value = pad(val);
+      });
+    });
+
     // Add slot
     document.getElementById('btn-add-slot').addEventListener('click', async () => {
       const startHH = document.getElementById('start-hh').value;
@@ -170,8 +188,8 @@ export async function renderCalendarView(container, profile, showToast) {
       const endHH = document.getElementById('end-hh').value;
       const endMM = document.getElementById('end-mm').value;
 
-      const start = \`\${startHH}:\${startMM}\`;
-      const end = \`\${endHH}:\${endMM}\`;
+      const start = `${startHH}:${startMM}`;
+      const end = `${endHH}:${endMM}`;
 
       if (!isValidTimeRange(start, end)) {
         showToast('Horário inválido. Início deve ser antes do fim.', 'error');
