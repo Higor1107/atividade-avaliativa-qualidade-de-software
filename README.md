@@ -96,7 +96,7 @@ npm run build
 npm run preview
 ```
 
-## 🧪 Como rodar os testes
+## Como rodar os testes
 
 ```bash
 # Rodar todos os testes
