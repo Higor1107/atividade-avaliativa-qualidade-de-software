@@ -148,5 +148,5 @@ graph LR
 
 ## 👥 Integrantes
 
-- **Gabriel Sanches de Souza** — [GitHub](https://github.com/gabriel-sanches)
-- **Higor Silva Monteiro de Souza** — [GitHub](https://github.com/Higor1107)
+- **Gabriel Sanches de Souza** —- [GitHub](https://github.com/GabrielSanchessz)
+- **Higor Silva Monteiro de Souza** -— [GitHub](https://github.com/Higor1107)
