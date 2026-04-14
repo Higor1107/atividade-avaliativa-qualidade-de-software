@@ -123,7 +123,7 @@ npm run test:watch
 
 ### Threshold de Coverage
 
-O projeto exige **80% de cobertura mínima** em branches, functions, lines e statements. A pipeline falha automaticamente se esse limite não for atingido.
+O projeto exige **80% de cobertura mínima** em branches, functions, lines e statements. A pipeline falha automaticamente se este limite não for atingido.
 
 ## ⚙️ Pipeline CI/CD
 
